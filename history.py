@@ -6,7 +6,6 @@ import matplotlib.dates as mdates
 import mplfinance as mpf
 import talib as ta
 import pandas as pd
-
 from scipy.signal import argrelextrema
 import numpy as np
 
@@ -54,16 +53,9 @@ class stockhistory():
         self.data.head(3)
         self.data.tail(3)
 
-        #peaks
+        #peaks & nadir
         peaksdate = argrelextrema(self.data["Open"].values, np.greater, order=5)
         nadirdate = argrelextrema(self.data["Open"].values, np.less, order=5)
-        
-        # print(len(self.data["Open"]))
-        # print(len(c_max_index[0]))
-        # print(len(self.data))
-        # (fig, ax) = plt.subplots()
-        # ax.plot(c_max_index[0], self.data["Open"][c_max_index[0]], marker='o', linestyle='dashed', color='green', label="Peaks")
-        # aplot.append(mpf.make_addplot(self.data["Open"][c_max_index[0]], type='scatter', marker='v', markersize=200, color='r'))
         peak = np.empty(len(self.data))
         peak[:] = np.NaN
         nadir = np.empty(len(self.data))
@@ -78,7 +70,7 @@ class stockhistory():
         mpf.plot(self.data,type='candle',style='charles', addplot=aplot, title=f"\n{self.ticker}\n{self.period}", ylabel='')
     
 def main():
-    h1 = stockhistory(yf.Ticker("MSFT"),"1y")
+    h1 = stockhistory(yf.Ticker("MSFT"),"1mo")
     h1.plotKdiagram()
 
 if __name__ == "__main__":
