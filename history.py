@@ -7,6 +7,8 @@ import mplfinance as mpf
 import talib as ta
 import pandas as pd
 
+from scipy.signal import argrelextrema
+import numpy as np
 
 class stockhistory():
     def __init__(self, ticker, period):
@@ -52,6 +54,27 @@ class stockhistory():
         self.data.head(3)
         self.data.tail(3)
 
+        #peaks
+        peaksdate = argrelextrema(self.data["Open"].values, np.greater, order=5)
+        nadirdate = argrelextrema(self.data["Open"].values, np.less, order=5)
+        
+        # print(len(self.data["Open"]))
+        # print(len(c_max_index[0]))
+        # print(len(self.data))
+        # (fig, ax) = plt.subplots()
+        # ax.plot(c_max_index[0], self.data["Open"][c_max_index[0]], marker='o', linestyle='dashed', color='green', label="Peaks")
+        # aplot.append(mpf.make_addplot(self.data["Open"][c_max_index[0]], type='scatter', marker='v', markersize=200, color='r'))
+        peak = np.empty(len(self.data))
+        peak[:] = np.NaN
+        nadir = np.empty(len(self.data))
+        nadir[:] = np.NaN
+        for num in peaksdate[0]:
+            peak[num] = self.data["Open"][num]
+        for num in nadirdate[0]:
+            nadir[num] = self.data["Open"][num]
+        aplot.append(mpf.make_addplot(peak, type='scatter', marker='o', markersize=20, color='r'))
+        aplot.append(mpf.make_addplot(nadir, type='scatter', marker='o', markersize=20, color='g'))
+                    
         mpf.plot(self.data,type='candle',style='charles', addplot=aplot, title=f"\n{self.ticker}\n{self.period}", ylabel='')
     
 def main():
