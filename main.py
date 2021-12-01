@@ -3,6 +3,7 @@ import os.path
 import history as hs
 from pathlib import Path
 import csv
+import threading
 
 file_list_column = [
     [
@@ -13,7 +14,7 @@ file_list_column = [
         sg.Combo(['1d','5d','1mo','3mo','6mo','1y','2y','5y','10y','ytd','max'],default_value='1y',key='-Period-'),
         
     ],
-    [sg.Button("get"),sg.Button("addfav"),],
+    [sg.Button("addfav"),sg.Button("get"),sg.Button("getfav"),],
 
     [
         sg.Listbox(
@@ -84,6 +85,10 @@ def writetofav(text):
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
             spamwriter.writerow([text])
 
+def mutithreadstock(item,period):
+    print(f"{item},{period}")
+    hs.stockhistory(item,period).plotKdiagram()
+
 def main():
 
     Path(filepath).mkdir(parents=True, exist_ok=True)
@@ -93,7 +98,7 @@ def main():
 
     
     window = sg.Window("Image Viewer", layout)
-    event, values = window.read()
+    event, values = window.read(timeout=0)
     graph_file_list = updategraphlist(window)
     fav_list = updatefavlist(window)
 
@@ -125,6 +130,14 @@ def main():
                 window["-IMAGE-"].update(filename=filename)
             except:
                 pass
+        elif event == "getfav":
+            thread=[]
+            for item in fav_list:
+                thread.append(threading.Thread(target = mutithreadstock, args = (item[0],values['-Period-'],)))
+            for i in range(len(thread)):
+                thread[i].start()
+            for i in range(len(thread)):
+                thread[i].join()
         graph_file_list = updategraphlist(window)
         fav_list = updatefavlist(window)
         # print(fav_list)
