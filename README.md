@@ -7,9 +7,13 @@ talib link: https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib
 ```bash
 #create venv
 py -m venv venv
+
+#use venv
 venv\Scripts\activate.bat
+
 #install lib
 py -m pip install -r requirements.txt
+
 #run program
 py -m main.py
 ```
