@@ -92,7 +92,8 @@ class stockhistory():
 def main():
     h1 = stockhistory("MSFT","2y")
     # h1.save = False
-    h1.plotKdiagram()
+    # h1.plotKdiagram()
+    h1.printhistory()
 
 if __name__ == "__main__":
     main()

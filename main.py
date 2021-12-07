@@ -22,8 +22,14 @@ file_list_column = [
         ),
         sg.Listbox(
             values=[], enable_events=True, size=(40, 20), key="-FILE LIST-"
-        )
+        ),
     ],
+    [   
+        sg.Checkbox('volume', default=True,key='volume'),
+        sg.Checkbox('macd', default=True,key='macd'),
+        sg.Checkbox('ma', default=True,key='ma'),
+        sg.Checkbox('peaks & nadir', default=True,key='pn'),   
+    ]
 ]
 
 image_viewer_column = [
@@ -87,7 +93,61 @@ def writetofav(text):
 
 def mutithreadstock(item,period):
     print(f"{item},{period}")
-    hs.stockhistory(item,period).plotKdiagram()
+    ticker = yf.Ticker(item)
+    h = hs.stockhistory(item,period)
+    plotKdiagram(h.data,ticker,period)
+    
+import yfinance as yf
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import mplfinance as mpf
+import talib as ta
+import pandas as pd
+from scipy.signal import argrelextrema
+import numpy as np
+def plotKdiagram(data,ticker,period,values):
+    aplot =[]
+
+    #volume
+    if (values["volume"]):
+        data['Volume'] = data['Volume'] / 1000
+
+    #macd
+    data["macd"], data["macd_signal"], data["macd_hist"] = ta.MACD(data['Close'])
+    colors = ['g' if v >= 0 else 'r' for v in data["macd_hist"]]
+    if period not in ['1d','5d','1mo']:
+        aplot.append(mpf.make_addplot(data["macd_hist"], type='bar', panel=1, color=colors))
+
+    #moving average
+    open_mav10 = data["Open"].rolling(10).mean().values
+    open_mav20 = data["Open"].rolling(20).mean().values
+    mavdf = pd.DataFrame(dict(OpMav10=open_mav10,OpMav20=open_mav20))
+    if period not in ['1d','5d']:
+        aplot.append(mpf.make_addplot(mavdf,type='line'))
+
+    data.index.name = 'Date'
+    data.shape
+    data.head(3)
+    data.tail(3)
+
+    #peaks & nadir
+    max = np.maximum(data["Open"].values,data["Close"].values)
+    min = np.minimum(data["Open"].values,data["Close"].values)
+    peaksdate = argrelextrema(max, np.greater, order=5)
+    nadirdate = argrelextrema(min, np.less, order=5)
+    peak = np.empty(len(data))
+    peak[:] = np.NaN
+    nadir = np.empty(len(data))
+    nadir[:] = np.NaN
+    for num in peaksdate[0]:
+        peak[num] = max[num]#self.data["Open"][num]
+    for num in nadirdate[0]:
+        nadir[num] = min[num]#self.data["Open"][num]
+    aplot.append(mpf.make_addplot(peak, type='scatter', marker='o', markersize=20, color='r'))
+    aplot.append(mpf.make_addplot(nadir, type='scatter', marker='o', markersize=20, color='g'))
+    mpf.plot(data,type='candle',style='charles', addplot=aplot, title=f"\n{ticker}\n{period}", ylabel='', savefig=f'file/{ticker.info["symbol"]}_{period}.png')
+    plt.close()
 
 def main():
 
@@ -104,7 +164,6 @@ def main():
 
     while True:
         event, values = window.read()
-
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
 
