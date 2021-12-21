@@ -1,3 +1,5 @@
 file
 fav.csv
 *.db
+lib/ta-lib
+venv

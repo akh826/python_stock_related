@@ -1,7 +1,8 @@
 numpy==1.21.2
 yfinance==0.1.67
-TA-Lib @ file:lib/TA_Lib-0.4.21-cp39-cp39-win_amd64.whl
+# TA-Lib @ file:lib/TA_Lib-0.4.21-cp39-cp39-win_amd64.whl
 scipy==1.7.3
 pandas==1.3.4
 matplotlib==3.5.0
 pysimplegui==4.55.1
+mplfinance==0.12.8b6
